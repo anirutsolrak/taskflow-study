@@ -18,15 +18,17 @@ export async function buscarTarefas(): Promise<Tarefa[]> {
   return resposta.json()
 }
 
-export async function criarTarefa(titulo: string): Promise<Tarefa> {
+export async function criarTarefa(titulo: string, tag?: string): Promise<Tarefa> {
   const token = getToken()
+  const corpo: { titulo: string; tag?: string } = { titulo }
+  if (tag) corpo.tag = tag
   const resposta = await fetch(`${API_URL}/tarefas/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ titulo }),
+    body: JSON.stringify(corpo),
   })
   if (!resposta.ok) {
     throw new Error("Erro ao criar tarefa")
