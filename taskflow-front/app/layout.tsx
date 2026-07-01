@@ -40,6 +40,7 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       data-theme="light"
+      suppressHydrationWarning
       className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
     >
       <head>
