@@ -37,7 +37,14 @@ export default function Tarefas() {
       router.replace("/login")
       return
     }
-    carregarTarefas()
+    let ativo = true
+    buscarTarefas()
+      .then((d) => ativo && setTarefas(d))
+      .catch(() => ativo && setTarefas([]))
+      .finally(() => ativo && setCarregando(false))
+    return () => {
+      ativo = false
+    }
   }, [router])
 
   async function handleCriar(e: React.FormEvent) {

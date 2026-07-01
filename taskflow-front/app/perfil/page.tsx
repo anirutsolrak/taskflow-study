@@ -30,9 +30,19 @@ export default function Perfil() {
       router.replace("/login")
       return
     }
-    setEmail(localStorage.getItem("user_email") || "voce@email.com")
-    setResumo(localStorage.getItem("catnotes-resumo") !== "off")
-    buscarTarefas().then(setTarefas).catch(() => setTarefas([]))
+    const emailSalvo = localStorage.getItem("user_email") || "voce@email.com"
+    const resumoSalvo = localStorage.getItem("catnotes-resumo") !== "off"
+    let ativo = true
+    const aplicar = (lista: Tarefa[]) => {
+      if (!ativo) return
+      setTarefas(lista)
+      setEmail(emailSalvo)
+      setResumo(resumoSalvo)
+    }
+    buscarTarefas().then(aplicar).catch(() => aplicar([]))
+    return () => {
+      ativo = false
+    }
   }, [router])
 
   const feitas = tarefas.filter((t) => t.concluida).length
