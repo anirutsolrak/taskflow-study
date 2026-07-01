@@ -15,7 +15,7 @@ def listar_tarefas(usuario_atual = Depends(obter_usuario_atual)):
 #criar tarefa
 @router.post("/")
 def criar_tarefa(tarefa: CriarTarefa , usuario_atual = Depends(obter_usuario_atual)):
-    response = supabase.table("tarefas").insert(tarefa.model_dump()).execute()
+    response = supabase.table("tarefas").insert(tarefa.model_dump(exclude_none=True)).execute()
     return response.data[0]
 
 #listar tarefa por id

@@ -13,7 +13,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    # aceita qualquer porta de localhost em dev (3000, 3001, ...);
+    # em producao troque por allow_origins com o dominio real.
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
