@@ -43,10 +43,8 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: noFlashTheme }} />
-      </head>
       <body className="min-h-full">
+        <script dangerouslySetInnerHTML={{ __html: noFlashTheme }} />
         <ThemeProvider>
           <ToastProvider>{children}</ToastProvider>
         </ThemeProvider>

@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useSyncExternalStore } from "react"
 
 type Theme = "light" | "dark"
 
@@ -14,30 +14,42 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 const STORAGE_KEY = "catnotes-theme"
+const listeners = new Set<() => void>()
 
-function temaInicial(): Theme {
+// Fonte da verdade no cliente = atributo data-theme no <html>
+// (definido pelo script anti-flash antes da hidratacao e atualizado aqui).
+function lerTema(): Theme {
   if (typeof document === "undefined") return "light"
-  const atual = document.documentElement.getAttribute("data-theme")
-  return atual === "dark" ? "dark" : "light"
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light"
+}
+
+function aplicarTema(t: Theme) {
+  if (typeof document !== "undefined") document.documentElement.dataset.theme = t
+  try {
+    localStorage.setItem(STORAGE_KEY, t)
+  } catch {
+    /* storage indisponivel */
+  }
+  listeners.forEach((cb) => cb())
+}
+
+function subscribe(cb: () => void) {
+  listeners.add(cb)
+  return () => {
+    listeners.delete(cb)
+  }
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(temaInicial)
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    try {
-      localStorage.setItem(STORAGE_KEY, theme)
-    } catch {
-      /* ignora storage indisponivel */
-    }
-  }, [theme])
+  // getServerSnapshot ("light") e usado no SSR e na hidratacao inicial,
+  // entao servidor e cliente batem; depois troca para o valor real.
+  const theme = useSyncExternalStore(subscribe, lerTema, (): Theme => "light")
 
   const value: ThemeContextValue = {
     theme,
-    toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")),
-    setLight: () => setTheme("light"),
-    setDark: () => setTheme("dark"),
+    toggle: () => aplicarTema(theme === "dark" ? "light" : "dark"),
+    setLight: () => aplicarTema("light"),
+    setDark: () => aplicarTema("dark"),
   }
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
