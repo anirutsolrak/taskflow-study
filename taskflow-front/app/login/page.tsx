@@ -21,6 +21,7 @@ export default function Login() {
     try {
       const dados = await login(email, senha)
       localStorage.setItem("access_token", dados.access_token)
+      localStorage.setItem("user_email", email)
       router.push("/tarefas")
     } catch {
       setErro("Email ou senha incorretos")
