@@ -66,10 +66,20 @@ export default function Tarefas() {
 
   async function handleAlternar(id: string, concluida: boolean) {
     try {
-      await atualizarTarefa(id, concluida)
+      await atualizarTarefa(id, { concluida })
       await carregarTarefas()
     } catch (err) {
       tratarErro(err, "Não foi possível atualizar. Tente de novo.")
+    }
+  }
+
+  async function handleEditar(id: string, titulo: string) {
+    try {
+      await atualizarTarefa(id, { titulo })
+      await carregarTarefas()
+      showToast("Tarefa atualizada.")
+    } catch (err) {
+      tratarErro(err, "Não foi possível editar. Tente de novo.")
     }
   }
 
@@ -122,7 +132,7 @@ export default function Tarefas() {
             {visiveis.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {visiveis.map((t) => (
-                  <TarefaCard key={t.id} tarefa={t} aoAlternar={handleAlternar} aoPedirDelete={setConfirmId} />
+                  <TarefaCard key={t.id} tarefa={t} aoAlternar={handleAlternar} aoEditar={handleEditar} aoPedirDelete={setConfirmId} />
                 ))}
               </div>
             ) : (

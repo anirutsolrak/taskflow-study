@@ -57,11 +57,14 @@ export async function criarTarefa(titulo: string, tag?: string): Promise<Tarefa>
   return resposta.json()
 }
 
-export async function atualizarTarefa(id: string, concluida: boolean): Promise<Tarefa> {
+export async function atualizarTarefa(
+  id: string,
+  dados: { concluida?: boolean; titulo?: string },
+): Promise<Tarefa> {
   const resposta = await apiFetch(`/tarefas/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ concluida }),
+    body: JSON.stringify(dados),
   })
   if (!resposta.ok) {
     throw new Error("Erro ao atualizar tarefa")

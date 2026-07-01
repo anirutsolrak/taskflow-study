@@ -1,15 +1,41 @@
 "use client"
 
+import { useState } from "react"
 import { Tarefa } from "@/types"
 
 interface TarefaCardProps {
   tarefa: Tarefa
   aoAlternar: (id: string, concluida: boolean) => void
+  aoEditar: (id: string, titulo: string) => void
   aoPedirDelete: (id: string) => void
 }
 
-export default function TarefaCard({ tarefa, aoAlternar, aoPedirDelete }: TarefaCardProps) {
+const acao: React.CSSProperties = {
+  color: "var(--faint)",
+  cursor: "pointer",
+  lineHeight: 1,
+  transition: "color .15s ease",
+}
+
+export default function TarefaCard({ tarefa, aoAlternar, aoEditar, aoPedirDelete }: TarefaCardProps) {
   const { concluida } = tarefa
+  const [editando, setEditando] = useState(false)
+  const [rascunho, setRascunho] = useState(tarefa.titulo)
+
+  function iniciarEdicao() {
+    setRascunho(tarefa.titulo)
+    setEditando(true)
+  }
+  function salvar() {
+    const limpo = rascunho.trim()
+    setEditando(false)
+    if (limpo && limpo !== tarefa.titulo) aoEditar(tarefa.id, limpo)
+  }
+  function cancelar() {
+    setRascunho(tarefa.titulo)
+    setEditando(false)
+  }
+
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "13px", background: "var(--card)", border: "1px solid var(--warm2)", borderRadius: "13px", padding: "14px 15px" }}>
       {concluida ? (
@@ -18,13 +44,38 @@ export default function TarefaCard({ tarefa, aoAlternar, aoPedirDelete }: Tarefa
         <div onClick={() => aoAlternar(tarefa.id, true)} style={{ width: "24px", height: "24px", borderRadius: "7px", border: "2px solid var(--chk)", flex: "0 0 auto", cursor: "pointer" }} />
       )}
 
-      <div style={{ flex: 1, font: "500 15px var(--font-jakarta)", color: concluida ? "var(--faint)" : "var(--ink)", textDecoration: concluida ? "line-through" : "none" }}>{tarefa.titulo}</div>
+      {editando ? (
+        <input
+          autoFocus
+          value={rascunho}
+          onChange={(e) => setRascunho(e.target.value)}
+          onBlur={salvar}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") salvar()
+            if (e.key === "Escape") cancelar()
+          }}
+          className="cn-input"
+          style={{ flex: 1, padding: "8px 10px", fontSize: "15px" }}
+        />
+      ) : (
+        <div
+          onDoubleClick={iniciarEdicao}
+          title="Duplo clique para editar"
+          style={{ flex: 1, font: "500 15px var(--font-jakarta)", color: concluida ? "var(--faint)" : "var(--ink)", textDecoration: concluida ? "line-through" : "none", cursor: "text" }}
+        >
+          {tarefa.titulo}
+        </div>
+      )}
 
-      {tarefa.tag && !concluida && (
+      {!editando && tarefa.tag && !concluida && (
         <span style={{ font: "500 11px var(--font-jetbrains)", color: "var(--terra)", background: "color-mix(in srgb, var(--terra) 14%, transparent)", padding: "4px 8px", borderRadius: "6px" }}>{tarefa.tag}</span>
       )}
 
-      <span onClick={() => aoPedirDelete(tarefa.id)} style={{ font: "400 20px var(--font-jakarta)", color: "var(--faint)", cursor: "pointer", lineHeight: 1 }} title="Deletar">×</span>
+      {!editando && (
+        <span onClick={iniciarEdicao} style={{ ...acao, fontSize: "15px" }} title="Editar">✎</span>
+      )}
+
+      <span onClick={() => aoPedirDelete(tarefa.id)} style={{ ...acao, fontSize: "20px" }} title="Deletar">×</span>
     </div>
   )
 }
