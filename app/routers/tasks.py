@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
 from app.db.supabase import supabase
 from app.models.tasks import CriarTarefa, AtualizarTarefa
@@ -21,6 +22,8 @@ def criar_tarefa(tarefa: CriarTarefa , usuario_atual = Depends(obter_usuario_atu
 @router.put("/{tarefa_id}")
 def atualizar_tarefa(tarefa_id: str, tarefa: AtualizarTarefa, usuario_atual = Depends(obter_usuario_atual)):
     dados_atualizados = {campo: valor for campo, valor in tarefa.model_dump().items() if valor is not None}
+    if tarefa.concluida is not None:
+        dados_atualizados["concluida_em"] = datetime.now(timezone.utc).isoformat() if tarefa.concluida else None
     response = supabase.table("tarefas").update(dados_atualizados).eq("id", tarefa_id).execute()
     if not response.data:
         raise HTTPException(status_code=404, detail="Tarefa não encontrada")
