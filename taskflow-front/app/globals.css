@@ -1,26 +1,86 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --page: #f3eadd;
+  --surf: #fffdf9;
+  --surf2: #faf3e9;
+  --card: #fffaf2;
+  --ink: #2a2420;
+  --muted: #8a7d6e;
+  --faint: #b5a690;
+  --warm: #e6dccc;
+  --warm2: #efe6d8;
+  --bar: #f1e7d8;
+  --chk: #d8c6a8;
+  --amber: #e0a15a;
+  --terra: #cd7a52;
+  --terradeep: #b86a4a;
+  --danger: #c0492f;
+  --success: #3f8b54;
+  --shadow: rgba(160, 110, 60, 0.42);
+  --modal: rgba(42, 36, 32, 0.45);
+}
+
+[data-theme="dark"] {
+  --page: #19140f;
+  --surf: #241c15;
+  --surf2: #2d241b;
+  --card: #2a2118;
+  --ink: #f3ebe0;
+  --muted: #b1a18e;
+  --faint: #7d6c5b;
+  --warm: #3a2e23;
+  --warm2: #332a20;
+  --bar: #332a20;
+  --chk: #5a4a38;
+  --amber: #e8ad66;
+  --terra: #d98a5e;
+  --terradeep: #c2734a;
+  --danger: #e06a4f;
+  --success: #5aa873;
+  --shadow: rgba(0, 0, 0, 0.6);
+  --modal: rgba(0, 0, 0, 0.6);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-page: var(--page);
+  --color-surf: var(--surf);
+  --color-surf2: var(--surf2);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-warm: var(--warm);
+  --color-warm2: var(--warm2);
+  --color-bar: var(--bar);
+  --color-chk: var(--chk);
+  --color-amber: var(--amber);
+  --color-terra: var(--terra);
+  --color-terradeep: var(--terradeep);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-jakarta);
+  --font-mono: var(--font-jetbrains);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-jakarta), sans-serif;
 }
+
+@keyframes catBreathe { 0%, 100% { transform: scaleY(1) } 50% { transform: scaleY(1.05) translateY(-1px) } }
+@keyframes yarnRoll { 0% { transform: translateY(0) rotate(0deg) } 50% { transform: translateY(14px) rotate(180deg) } 100% { transform: translateY(0) rotate(360deg) } }
+@keyframes tailSway { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(20deg) } }
+@keyframes blink { 0%, 90%, 100% { transform: scaleY(1) } 95% { transform: scaleY(.12) } }
+@keyframes pawTrail { 0% { opacity: 0; transform: translateY(6px) } 30% { opacity: 1 } 100% { opacity: .25; transform: translateY(0) } }
+@keyframes floatY { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
+@keyframes spin { to { transform: rotate(360deg) } }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 16px) } to { opacity: 1; transform: translate(-50%, 0) } }
+@keyframes popIn { from { opacity: 0; transform: scale(.94) } to { opacity: 1; transform: scale(1) } }

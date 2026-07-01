@@ -1,21 +1,33 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const display = Space_Grotesk({
   subsets: ["latin"],
+  variable: "--font-space-grotesk",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
+  variable: "--font-jakarta",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
 });
 
 export const metadata: Metadata = {
-  title: "Taskflow",
-  description: "Gerencie suas tarefas",
+  title: "CATNotes",
+  description: "O jeito calmo de organizar o dia.",
 };
+
+const noFlashTheme = `
+try {
+  var t = localStorage.getItem("catnotes-theme");
+  if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+} catch (e) {}
+`;
 
 export default function RootLayout({
   children,
@@ -25,9 +37,13 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      data-theme="light"
+      className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: noFlashTheme }} />
+      </head>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }
