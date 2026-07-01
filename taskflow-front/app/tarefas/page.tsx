@@ -10,7 +10,7 @@ import TarefaCard from "@/components/TarefaCard"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import Otto from "@/components/Otto"
 import { useToast } from "@/components/providers/ToastProvider"
-import { buscarTarefas, criarTarefa, atualizarTarefa, deletarTarefa } from "@/services/api"
+import { buscarTarefas, criarTarefa, atualizarTarefa, deletarTarefa, SESSAO_EXPIRADA } from "@/services/api"
 import { Tarefa } from "@/types"
 
 export default function Tarefas() {
@@ -47,26 +47,42 @@ export default function Tarefas() {
     }
   }, [router])
 
+  function tratarErro(e: unknown, msg: string) {
+    if ((e as Error)?.message !== SESSAO_EXPIRADA) showToast(msg)
+  }
+
   async function handleCriar(e: React.FormEvent) {
     e.preventDefault()
     if (!novoTitulo.trim()) return
-    await criarTarefa(novoTitulo.trim())
-    setNovoTitulo("")
-    await carregarTarefas()
-    showToast("Tarefa adicionada.")
+    try {
+      await criarTarefa(novoTitulo.trim())
+      setNovoTitulo("")
+      await carregarTarefas()
+      showToast("Tarefa adicionada.")
+    } catch (err) {
+      tratarErro(err, "Não foi possível adicionar. Tente de novo.")
+    }
   }
 
   async function handleAlternar(id: string, concluida: boolean) {
-    await atualizarTarefa(id, concluida)
-    carregarTarefas()
+    try {
+      await atualizarTarefa(id, concluida)
+      await carregarTarefas()
+    } catch (err) {
+      tratarErro(err, "Não foi possível atualizar. Tente de novo.")
+    }
   }
 
   async function handleConfirmDelete() {
     if (!confirmId) return
-    await deletarTarefa(confirmId)
-    setConfirmId(null)
-    await carregarTarefas()
-    showToast("Tarefa removida")
+    try {
+      await deletarTarefa(confirmId)
+      setConfirmId(null)
+      await carregarTarefas()
+      showToast("Tarefa removida")
+    } catch (err) {
+      tratarErro(err, "Não foi possível remover. Tente de novo.")
+    }
   }
 
   const total = tarefas.length

@@ -7,11 +7,36 @@ function getToken(): string | null {
   return localStorage.getItem("access_token")
 }
 
-export async function buscarTarefas(): Promise<Tarefa[]> {
+// Erro sinalizando sessao expirada/invalida (o wrapper ja redirecionou).
+export const SESSAO_EXPIRADA = "SESSAO_EXPIRADA"
+
+function encerrarSessao() {
+  if (typeof window === "undefined") return
+  localStorage.removeItem("access_token")
+  localStorage.removeItem("user_email")
+  // hard redirect: limpa o estado da SPA e leva pro login
+  window.location.href = "/login?sessao=expirada"
+}
+
+// fetch autenticado: injeta o token e trata 401 de forma centralizada
+async function apiFetch(caminho: string, options: RequestInit = {}): Promise<Response> {
   const token = getToken()
-  const resposta = await fetch(`${API_URL}/tarefas/`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const resposta = await fetch(`${API_URL}${caminho}`, {
+    ...options,
+    headers: {
+      ...(options.headers ?? {}),
+      Authorization: `Bearer ${token}`,
+    },
   })
+  if (resposta.status === 401) {
+    encerrarSessao()
+    throw new Error(SESSAO_EXPIRADA)
+  }
+  return resposta
+}
+
+export async function buscarTarefas(): Promise<Tarefa[]> {
+  const resposta = await apiFetch("/tarefas/")
   if (!resposta.ok) {
     throw new Error("Erro ao buscar tarefas")
   }
@@ -19,15 +44,11 @@ export async function buscarTarefas(): Promise<Tarefa[]> {
 }
 
 export async function criarTarefa(titulo: string, tag?: string): Promise<Tarefa> {
-  const token = getToken()
   const corpo: { titulo: string; tag?: string } = { titulo }
   if (tag) corpo.tag = tag
-  const resposta = await fetch(`${API_URL}/tarefas/`, {
+  const resposta = await apiFetch("/tarefas/", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(corpo),
   })
   if (!resposta.ok) {
@@ -37,13 +58,9 @@ export async function criarTarefa(titulo: string, tag?: string): Promise<Tarefa>
 }
 
 export async function atualizarTarefa(id: string, concluida: boolean): Promise<Tarefa> {
-  const token = getToken()
-  const resposta = await fetch(`${API_URL}/tarefas/${id}`, {
+  const resposta = await apiFetch(`/tarefas/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ concluida }),
   })
   if (!resposta.ok) {
@@ -53,11 +70,7 @@ export async function atualizarTarefa(id: string, concluida: boolean): Promise<T
 }
 
 export async function deletarTarefa(id: string): Promise<void> {
-  const token = getToken()
-  const resposta = await fetch(`${API_URL}/tarefas/${id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const resposta = await apiFetch(`/tarefas/${id}`, { method: "DELETE" })
   if (!resposta.ok) {
     throw new Error("Erro ao deletar tarefa")
   }

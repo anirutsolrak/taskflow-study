@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { useRouter } from "next/navigation"
 import { login } from "@/services/api"
 import OttoMark from "@/components/OttoMark"
+
+const semSubscribe = () => () => {}
 
 const label: React.CSSProperties = {
   font: "500 13px var(--font-jakarta)", color: "var(--muted)", marginBottom: "7px",
@@ -14,6 +16,13 @@ export default function Login() {
   const [senha, setSenha] = useState("")
   const [erro, setErro] = useState("")
   const router = useRouter()
+
+  // valor client-only lido de forma segura pra hidratacao (SSR = false)
+  const sessaoExpirada = useSyncExternalStore(
+    semSubscribe,
+    () => new URLSearchParams(window.location.search).get("sessao") === "expirada",
+    () => false,
+  )
 
   async function handleSubmit(evento: React.FormEvent) {
     evento.preventDefault()
@@ -50,6 +59,9 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} style={{ flex: 1, padding: "48px 46px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            {sessaoExpirada && (
+              <div style={{ font: "500 13px var(--font-jakarta)", color: "var(--terra)", background: "color-mix(in srgb, var(--terra) 12%, transparent)", borderRadius: "9px", padding: "9px 12px", marginBottom: "16px" }}>Sua sessão expirou. Entre novamente.</div>
+            )}
             <div style={{ font: "500 13px/1 var(--font-jetbrains)", color: "var(--terra)", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: "10px" }}>Bem-vindo de volta</div>
             <h2 style={{ font: "700 28px/1.1 var(--font-space-grotesk)", color: "var(--ink)", margin: "0 0 26px", letterSpacing: "-.02em" }}>Entrar na conta</h2>
             <label style={label}>Email</label>
